@@ -32,7 +32,7 @@ interface ProjectStats {
   lastUpdated: string
 }
 
-export default function ProjectPage({ params }: { params: { projectSlug: string } }) {
+export default async function ProjectPage({ params }: { params: { projectSlug: string } }) {
   const [stats] = useState<ProjectStats>({
     datasets: { current: 3, max: 10 },
     models: { current: 2, max: 5 },
@@ -42,8 +42,10 @@ export default function ProjectPage({ params }: { params: { projectSlug: string 
     roi: 4.2,
     lastUpdated: "2024-01-16",
   })
+  
+  const projectSlug = params.projectSlug
 
-  const projectName = params.projectSlug.replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())
+  const projectName = projectSlug.replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())
 
   const recentActivity = [
     {
@@ -81,21 +83,21 @@ export default function ProjectPage({ params }: { params: { projectSlug: string 
       title: "New Dataset",
       description: "Upload data for training",
       icon: Database,
-      href: `/projects/${params.projectSlug}/datasets`,
+      href: `/projects/${projectSlug}/datasets`,
       color: "from-blue-500 to-cyan-500",
     },
     {
       title: "Training Job",
       description: "Start model training",
       icon: Brain,
-      href: `/projects/${params.projectSlug}/training`,
+      href: `/projects/${projectSlug}/training`,
       color: "from-purple-500 to-pink-500",
     },
     {
       title: "Deploy Model",
       description: "Deploy trained model",
       icon: Rocket,
-      href: `/projects/${params.projectSlug}/models`,
+      href: `/projects/${projectSlug}/models`,
       color: "from-green-500 to-emerald-500",
     },
   ]
@@ -129,13 +131,11 @@ export default function ProjectPage({ params }: { params: { projectSlug: string 
   }
 
   return (
-    <div className="space-y-6 p-4 sm:p-6">
+    <div className="space-y-6 lg:space-y-8">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
-            {projectName}
-          </h1>
+          <h1>{projectName}</h1>
           <p className="text-slate-400 mt-2 text-sm sm:text-base">Media Mix Modeling project overview and management</p>
         </div>
 
@@ -150,19 +150,19 @@ export default function ProjectPage({ params }: { params: { projectSlug: string 
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-slate-900 border-slate-700 w-56">
               <DropdownMenuItem asChild className="text-slate-300 focus:bg-slate-800 focus:text-cyan-300">
-                <Link href={`/projects/${params.projectSlug}/datasets`}>
+                <Link href={`/projects/${projectSlug}/datasets`}>
                   <Database className="h-4 w-4 mr-2" />
                   New Dataset
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild className="text-slate-300 focus:bg-slate-800 focus:text-cyan-300">
-                <Link href={`/projects/${params.projectSlug}/training`}>
+                <Link href={`/projects/${projectSlug}/training`}>
                   <Brain className="h-4 w-4 mr-2" />
                   Training Job
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild className="text-slate-300 focus:bg-slate-800 focus:text-cyan-300">
-                <Link href={`/projects/${params.projectSlug}/models`}>
+                <Link href={`/projects/${projectSlug}/models`}>
                   <Rocket className="h-4 w-4 mr-2" />
                   Deploy Model
                 </Link>
@@ -171,13 +171,13 @@ export default function ProjectPage({ params }: { params: { projectSlug: string 
           </DropdownMenu>
 
           <div className="flex gap-2">
-            <Link href={`/projects/${params.projectSlug}/dashboard`}>
+            <Link href={`/projects/${projectSlug}/dashboard`}>
               <Button variant="outline" className="border-slate-700 text-slate-300 hover:text-cyan-300 bg-transparent">
                 <BarChart3 className="h-4 w-4 mr-2" />
                 <span className="hidden sm:inline">Dashboard</span>
               </Button>
             </Link>
-            <Link href={`/projects/${params.projectSlug}/scenarios`}>
+            <Link href={`/projects/${projectSlug}/scenarios`}>
               <Button variant="outline" className="border-slate-700 text-slate-300 hover:text-cyan-300 bg-transparent">
                 <Target className="h-4 w-4 mr-2" />
                 <span className="hidden sm:inline">Scenarios</span>
@@ -189,7 +189,7 @@ export default function ProjectPage({ params }: { params: { projectSlug: string 
 
       {/* Navigation Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
-        <Link href={`/projects/${params.projectSlug}/datasets`}>
+        <Link href={`/projects/${projectSlug}/datasets`}>
           <Card className="bg-slate-900/50 border-slate-700 hover:border-cyan-500/50 transition-all cursor-pointer group">
             <CardContent className="p-4 text-center">
               <Database className="h-6 w-6 sm:h-8 sm:w-8 text-cyan-400 mx-auto mb-2 group-hover:scale-110 transition-transform" />
@@ -201,7 +201,7 @@ export default function ProjectPage({ params }: { params: { projectSlug: string 
           </Card>
         </Link>
 
-        <Link href={`/projects/${params.projectSlug}/training`}>
+        <Link href={`/projects/${projectSlug}/training`}>
           <Card className="bg-slate-900/50 border-slate-700 hover:border-purple-500/50 transition-all cursor-pointer group">
             <CardContent className="p-4 text-center">
               <Brain className="h-6 w-6 sm:h-8 sm:w-8 text-purple-400 mx-auto mb-2 group-hover:scale-110 transition-transform" />
@@ -211,7 +211,7 @@ export default function ProjectPage({ params }: { params: { projectSlug: string 
           </Card>
         </Link>
 
-        <Link href={`/projects/${params.projectSlug}/models`}>
+        <Link href={`/projects/${projectSlug}/models`}>
           <Card className="bg-slate-900/50 border-slate-700 hover:border-green-500/50 transition-all cursor-pointer group">
             <CardContent className="p-4 text-center">
               <Rocket className="h-6 w-6 sm:h-8 sm:w-8 text-green-400 mx-auto mb-2 group-hover:scale-110 transition-transform" />
@@ -221,7 +221,7 @@ export default function ProjectPage({ params }: { params: { projectSlug: string 
           </Card>
         </Link>
 
-        <Link href={`/projects/${params.projectSlug}/dashboard`}>
+        <Link href={`/projects/${projectSlug}/dashboard`}>
           <Card className="bg-slate-900/50 border-slate-700 hover:border-blue-500/50 transition-all cursor-pointer group">
             <CardContent className="p-4 text-center">
               <BarChart3 className="h-6 w-6 sm:h-8 sm:w-8 text-blue-400 mx-auto mb-2 group-hover:scale-110 transition-transform" />
@@ -231,7 +231,7 @@ export default function ProjectPage({ params }: { params: { projectSlug: string 
           </Card>
         </Link>
 
-        <Link href={`/projects/${params.projectSlug}/scenarios`}>
+        <Link href={`/projects/${projectSlug}/scenarios`}>
           <Card className="bg-slate-900/50 border-slate-700 hover:border-orange-500/50 transition-all cursor-pointer group col-span-2 sm:col-span-1">
             <CardContent className="p-4 text-center">
               <Target className="h-6 w-6 sm:h-8 sm:w-8 text-orange-400 mx-auto mb-2 group-hover:scale-110 transition-transform" />

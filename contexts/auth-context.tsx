@@ -5,6 +5,7 @@ import type React from "react"
 import { createContext, useContext, useEffect, useState } from "react"
 import type { User } from "@supabase/supabase-js"
 import { createClient } from "@/lib/supabase/client"
+import { redirect } from "next/navigation"
 
 interface AuthContextType {
   user: User | null
@@ -59,6 +60,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const supabase = createClient()
       await supabase.auth.signOut()
+      redirect("/login")
     } catch (error) {
       console.error("Error signing out:", error)
     }

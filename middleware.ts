@@ -1,6 +1,10 @@
 import { createServerClient } from "@supabase/ssr"
 import { NextResponse, type NextRequest } from "next/server"
 
+// Protected routes
+const protectedRoutes = ["/app/"]
+const authRoutes = ["/login", "/signup"]
+
 export async function middleware(request: NextRequest) {
   // Check if Supabase environment variables are available
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -43,10 +47,6 @@ export async function middleware(request: NextRequest) {
       console.warn("Error getting user in middleware:", error.message)
     }
 
-    // Protected routes
-    const protectedRoutes = ["/projects", "/models", "/analytics", "/settings"]
-    const authRoutes = ["/login", "/signup"]
-
     const isProtectedRoute = protectedRoutes.some((route) => request.nextUrl.pathname.startsWith(route))
     const isAuthRoute = authRoutes.includes(request.nextUrl.pathname)
 
@@ -59,7 +59,7 @@ export async function middleware(request: NextRequest) {
 
     // Redirect to projects if accessing auth routes while authenticated
     if (isAuthRoute && user) {
-      return NextResponse.redirect(new URL("/projects", request.url))
+      return NextResponse.redirect(new URL("/app/projects", request.url))
     }
 
     return supabaseResponse

@@ -81,7 +81,7 @@ export function AppHeader() {
       } else if (segment === "settings") {
         breadcrumbs.push({
           name: "Settings",
-          href: "/settings",
+          href: "/app/settings",
         })
       }
     })
@@ -138,7 +138,7 @@ export function AppHeader() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-slate-900 border-slate-700">
               <DropdownMenuItem asChild className="text-slate-300 focus:bg-slate-800 focus:text-cyan-300">
-                <Link href="/settings">
+                <Link href="/app/settings">
                   <Settings className="h-4 w-4 mr-2" />
                   Settings
                 </Link>
