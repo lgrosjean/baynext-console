@@ -1,8 +1,8 @@
 import { Zap } from "lucide-react"
 
-export default function AuthLoading() {
+export default function Loading() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950">
+    <div className="h-screen flex items-center justify-center bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950">
       <div className="text-center">
         <div className="relative mb-4">
           <Zap className="h-16 w-16 text-cyan-400 mx-auto animate-pulse" />

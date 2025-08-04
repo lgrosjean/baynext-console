@@ -118,6 +118,10 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  h1 {
+    @apply text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent
+  }
 }
 
 /* Custom scrollbar styles */

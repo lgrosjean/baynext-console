@@ -10,7 +10,6 @@ interface AuthContextType {
   user: User | null
   loading: boolean
   signOut: () => Promise<void>
-  isSupabaseConfigured: boolean
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -18,7 +17,6 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
-  const [isSupabaseConfigured, setIsSupabaseConfigured] = useState(true)
 
   useEffect(() => {
     let supabase: ReturnType<typeof createClient> | null = null
@@ -27,7 +25,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       supabase = createClient()
     } catch (error) {
       console.warn("Supabase not configured:", error)
-      setIsSupabaseConfigured(false)
       setLoading(false)
       return
     }
@@ -58,7 +55,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const signOut = async () => {
-    if (!isSupabaseConfigured) return
 
     try {
       const supabase = createClient()
@@ -69,7 +65,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, signOut, isSupabaseConfigured }}>{children}</AuthContext.Provider>
+    <AuthContext.Provider value={{ user, loading, signOut }}>{children}</AuthContext.Provider>
   )
 }
 

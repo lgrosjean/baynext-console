@@ -6,18 +6,18 @@ import { useRouter } from "next/navigation"
 import { useEffect } from "react"
 
 export default function HomePage() {
-  const { user, loading } = useAuth()
+  const { user, loading, isSupabaseConfigured } = useAuth()
   const router = useRouter()
 
   useEffect(() => {
-    if (!loading) {
+    if (!loading && isSupabaseConfigured) {
       if (user) {
         router.push("/app/projects")
       } else {
         router.push("/login")
       }
     }
-  }, [user, loading, router])
+  }, [user, loading, isSupabaseConfigured, router])
 
   if (loading) {
     return <AuthLoading />

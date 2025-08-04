@@ -138,9 +138,7 @@ export default function ProjectsPage() {
       {/* Header Section */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 lg:gap-6">
         <div>
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
-            Projects
-          </h1>
+          <h1>Projects</h1>
           <p className="text-slate-400 mt-1 sm:mt-2 text-sm sm:text-base lg:text-lg">
             Manage your mix marketing model projects
           </p>
@@ -148,7 +146,7 @@ export default function ProjectsPage() {
 
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600 text-white shadow-lg shadow-cyan-500/25 w-full sm:w-auto lg:px-6 lg:py-3 lg:text-base">
+            <Button className="bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600 text-white shadow-lg shadow-cyan-500/25 w-full sm:w-auto lg:px-6 lg:py-3 transition-colors">
               <Plus className="h-4 w-4 mr-2" />
               New Project
             </Button>
@@ -257,7 +255,7 @@ export default function ProjectsPage() {
       {viewMode === "grid" ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
           {projects.map((project) => (
-            <Link key={project.id} href={`/projects/${project.name.toLowerCase().replace(/\s+/g, "-")}`}>
+            <Link key={project.id} href={`/app/projects/${project.name.toLowerCase().replace(/\s+/g, "-")}`}>
               <Card className="bg-slate-900/50 border-slate-700 hover:border-cyan-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/10 cursor-pointer group h-full">
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between gap-2">
