@@ -32,9 +32,9 @@ const recentActivity: Activity[] = [
     },
   ]
 
-export async function getRecentActivity(): Promise<Activity[]> {
+export async function getRecentActivity(projectSlug: string): Promise<Activity[]> {
   // Simulate a delay to mimic real API call
   await new Promise(resolve => setTimeout(resolve, 1000));
-  
+  console.log(`Fetching recent activity for project: ${projectSlug}`);
   return recentActivity;
 }

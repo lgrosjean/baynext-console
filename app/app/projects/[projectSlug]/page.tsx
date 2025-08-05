@@ -1,9 +1,7 @@
-import { useState } from "react"
 import Link from "next/link"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import {
   Plus,
@@ -13,25 +11,25 @@ import {
   BarChart3,
   Target,
   TrendingUp,
-  Calendar,
-  Activity,
   ChevronDown,
-  FileText,
   Play,
 } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
+// Actions
 import { getRecentActivity } from "@/actions/app/activities"
-import { RecentActivityCard } from "@/components/dashboard/recent-activity-card"
 import { getProjectStats } from "@/actions/app/projects"
 
+// Components
+import { RecentActivityCard } from "@/components/dashboard/recent-activity-card"
+import { ProjectInfoCard } from "@/components/dashboard/project-info-card"
 
 export default async function ProjectPage({ params }: { params: { projectSlug: string } }) {
 
   const projectSlug = (await params).projectSlug
 
-  const projectName = projectSlug.replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())
-  const recentActivity = await getRecentActivity()
+  const project = await getProjectStats(projectSlug)
+  const recentActivity = await getRecentActivity(projectSlug)
   const stats = await getProjectStats(projectSlug)
 
   const quickActions = [
@@ -58,17 +56,17 @@ export default async function ProjectPage({ params }: { params: { projectSlug: s
     },
   ]
 
-  
 
-  
 
   return (
     <div className="space-y-6 lg:space-y-8">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1>{projectName}</h1>
-          <p className="text-slate-400 mt-2 text-sm sm:text-base">Media Mix Modeling project overview and management</p>
+          <h1>{project.name}</h1>
+          <p className="text-slate-400 mt-2 text-sm sm:text-base">
+            Project overview and management.
+          </p>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3">
@@ -104,13 +102,13 @@ export default async function ProjectPage({ params }: { params: { projectSlug: s
 
           <div className="flex gap-2">
             <Link href={`/app/projects/${projectSlug}/dashboard`}>
-              <Button variant="outline" className="border-slate-700 text-slate-300 hover:text-cyan-300 bg-transparent">
+              <Button variant="outline" className="border-slate-700 text-slate-300 hover:text-blue-400 bg-transparent">
                 <BarChart3 className="h-4 w-4 mr-2" />
                 <span className="hidden sm:inline">Dashboard</span>
               </Button>
             </Link>
             <Link href={`/app/projects/${projectSlug}/scenarios`}>
-              <Button variant="outline" className="border-slate-700 text-slate-300 hover:text-cyan-300 bg-transparent">
+              <Button variant="outline" className="border-slate-700 text-slate-300 hover:text-orange-400 bg-transparent">
                 <Target className="h-4 w-4 mr-2" />
                 <span className="hidden sm:inline">Scenarios</span>
               </Button>
@@ -127,7 +125,7 @@ export default async function ProjectPage({ params }: { params: { projectSlug: s
               <Database className="h-6 w-6 sm:h-8 sm:w-8 text-cyan-400 mx-auto mb-2 group-hover:scale-110 transition-transform" />
               <h3 className="font-medium text-white text-sm sm:text-base">Datasets</h3>
               <p className="text-xs text-slate-400 mt-1">
-                {stats.datasets.current} of {stats.datasets.max}
+                {stats.datasets.used} of {stats.datasets.limit}
               </p>
             </CardContent>
           </Card>
@@ -138,7 +136,7 @@ export default async function ProjectPage({ params }: { params: { projectSlug: s
             <CardContent className="p-4 text-center">
               <Brain className="h-6 w-6 sm:h-8 sm:w-8 text-purple-400 mx-auto mb-2 group-hover:scale-110 transition-transform" />
               <h3 className="font-medium text-white text-sm sm:text-base">Training</h3>
-              <p className="text-xs text-slate-400 mt-1">{stats.monthlyJobs.current} this month</p>
+              <p className="text-xs text-slate-400 mt-1">{stats.jobs.used} this month</p>
             </CardContent>
           </Card>
         </Link>
@@ -148,7 +146,7 @@ export default async function ProjectPage({ params }: { params: { projectSlug: s
             <CardContent className="p-4 text-center">
               <Rocket className="h-6 w-6 sm:h-8 sm:w-8 text-green-400 mx-auto mb-2 group-hover:scale-110 transition-transform" />
               <h3 className="font-medium text-white text-sm sm:text-base">Models</h3>
-              <p className="text-xs text-slate-400 mt-1">{stats.models.current} deployed</p>
+              <p className="text-xs text-slate-400 mt-1">{stats.models.used} deployed</p>
             </CardContent>
           </Card>
         </Link>
@@ -158,7 +156,7 @@ export default async function ProjectPage({ params }: { params: { projectSlug: s
             <CardContent className="p-4 text-center">
               <BarChart3 className="h-6 w-6 sm:h-8 sm:w-8 text-blue-400 mx-auto mb-2 group-hover:scale-110 transition-transform" />
               <h3 className="font-medium text-white text-sm sm:text-base">Dashboard</h3>
-              <p className="text-xs text-slate-400 mt-1">{stats.dashboards.current} active</p>
+              <p className="text-xs text-slate-400 mt-1">{stats.dashboards.used} active</p>
             </CardContent>
           </Card>
         </Link>
@@ -168,11 +166,16 @@ export default async function ProjectPage({ params }: { params: { projectSlug: s
             <CardContent className="p-4 text-center">
               <Target className="h-6 w-6 sm:h-8 sm:w-8 text-orange-400 mx-auto mb-2 group-hover:scale-110 transition-transform" />
               <h3 className="font-medium text-white text-sm sm:text-base">Scenarios</h3>
-              <p className="text-xs text-slate-400 mt-1">What-if analysis</p>
+              <p className="text-xs text-slate-400 mt-1">
+                <span className="text-orange-400 font-bold">{stats.scenarios.used} </span>
+                this month
+              </p>
             </CardContent>
           </Card>
         </Link>
       </div>
+
+      <h2 className="text-lg font-semibold text-white mt-6">Project Overview</h2>
 
       {/* KPI Overview */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -187,14 +190,14 @@ export default async function ProjectPage({ params }: { params: { projectSlug: s
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-white font-medium">
-                  {stats.datasets.current} / {stats.datasets.max}
+                  {stats.datasets.used} / {stats.datasets.limit}
                 </span>
                 <span className="text-slate-400">
-                  {Math.round((stats.datasets.current / stats.datasets.max) * 100)}%
+                  {Math.round((stats.datasets.used / stats.datasets.limit) * 100)}%
                 </span>
               </div>
-              <Progress value={(stats.datasets.current / stats.datasets.max) * 100} className="h-2 bg-slate-800" />
-              <p className="text-xs text-slate-500">{stats.datasets.max - stats.datasets.current} slots remaining</p>
+              <Progress value={(stats.datasets.used / stats.datasets.limit) * 100} className="h-2 bg-slate-800" />
+              <p className="text-xs text-slate-500">{stats.datasets.limit - stats.datasets.used} slots remaining</p>
             </div>
           </CardContent>
         </Card>
@@ -210,12 +213,12 @@ export default async function ProjectPage({ params }: { params: { projectSlug: s
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-white font-medium">
-                  {stats.models.current} / {stats.models.max}
+                  {stats.models.used} / {stats.models.limit}
                 </span>
-                <span className="text-slate-400">{Math.round((stats.models.current / stats.models.max) * 100)}%</span>
+                <span className="text-slate-400">{Math.round((stats.models.used / stats.models.limit) * 100)}%</span>
               </div>
-              <Progress value={(stats.models.current / stats.models.max) * 100} className="h-2 bg-slate-800" />
-              <p className="text-xs text-slate-500">{stats.models.max - stats.models.current} slots available</p>
+              <Progress value={(stats.models.used / stats.models.limit) * 100} className="h-2 bg-slate-800" />
+              <p className="text-xs text-slate-500">{stats.models.limit - stats.models.used} slots available</p>
             </div>
           </CardContent>
         </Card>
@@ -231,18 +234,18 @@ export default async function ProjectPage({ params }: { params: { projectSlug: s
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-white font-medium">
-                  {stats.monthlyJobs.current} / {stats.monthlyJobs.max}
+                  {stats.jobs.used} / {stats.jobs.limit}
                 </span>
                 <span className="text-slate-400">
-                  {Math.round((stats.monthlyJobs.current / stats.monthlyJobs.max) * 100)}%
+                  {Math.round((stats.jobs.used / stats.jobs.limit) * 100)}%
                 </span>
               </div>
               <Progress
-                value={(stats.monthlyJobs.current / stats.monthlyJobs.max) * 100}
+                value={(stats.jobs.used / stats.jobs.limit) * 100}
                 className="h-2 bg-slate-800"
               />
               <p className="text-xs text-slate-500">
-                {stats.monthlyJobs.max - stats.monthlyJobs.current} jobs remaining
+                {stats.jobs.limit - stats.jobs.used} jobs remaining
               </p>
             </div>
           </CardContent>
@@ -303,51 +306,8 @@ export default async function ProjectPage({ params }: { params: { projectSlug: s
       </div>
 
       {/* Project Info */}
-      <Card className="bg-slate-900/50 border-slate-700">
-        <CardHeader>
-          <CardTitle className="text-white flex items-center justify-between">
-            <span className="flex items-center">
-              <FileText className="h-5 w-5 mr-2 text-cyan-400" />
-              Project Information
-            </span>
-            <Badge className="bg-green-400/10 text-green-400 border-green-400/20">
-              <Activity className="h-3 w-3 mr-1" />
-              Active
-            </Badge>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
-            <div>
-              <p className="text-slate-400">Project Type</p>
-              <p className="text-white font-medium">Media Mix Modeling</p>
-            </div>
-            <div>
-              <p className="text-slate-400">Created</p>
-              <p className="text-white font-medium">January 15, 2024</p>
-            </div>
-            <div>
-              <p className="text-slate-400">Last Updated</p>
-              <p className="text-white font-medium flex items-center">
-                <Calendar className="h-3 w-3 mr-1" />
-                {new Date(stats.lastUpdated).toLocaleDateString()}
-              </p>
-            </div>
-            <div>
-              <p className="text-slate-400">Data Sources</p>
-              <p className="text-white font-medium">{stats.datasets.current} datasets</p>
-            </div>
-            <div>
-              <p className="text-slate-400">Model Status</p>
-              <p className="text-white font-medium">Production Ready</p>
-            </div>
-            <div>
-              <p className="text-slate-400">Team Members</p>
-              <p className="text-white font-medium">3 collaborators</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <ProjectInfoCard stats={stats} />
+
     </div>
   )
 }

@@ -45,3 +45,21 @@ export async function getDatasets(): Promise<Dataset[]> {
     // Return the mock datasets
     return datasets
 }
+
+export async function createDataset(dataset: Dataset): Promise<Dataset> {
+    // Simulate a delay to mimic real data creation
+    await new Promise((resolve) => setTimeout(resolve, 500))
+
+    // Assign a new ID and return the dataset
+    const newDataset = { ...dataset, id: (datasets.length + 1).toString() }
+    datasets.push(newDataset)
+    return newDataset
+}
+
+export async function countDatasets(): Promise<number> {
+    // Simulate a delay to mimic real data counting
+    await new Promise((resolve) => setTimeout(resolve, 500))
+    
+    // Return the count of datasets
+    return datasets.length
+}

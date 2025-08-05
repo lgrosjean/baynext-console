@@ -1,11 +1,41 @@
-interface ProjectStats {
-  datasets: { current: number; max: number }
-  models: { current: number; max: number }
-  monthlyJobs: { current: number; max: number }
-  dashboards: { current: number; max: number }
-  totalSpend: number
-  roi: number
-  lastUpdated: string
+export type ProjectStatus = "draft"  | "deployed" | "archived";
+export type ProjectTier = "free" | "pro";
+
+export interface ProjectCreate {
+  name: string
+  description: string
+  userId: string
 }
 
-export type { ProjectStats }
+interface Project extends ProjectCreate {
+  id: string
+  slug: string
+  createdAt: Date
+  updatedAt: Date
+  status: ProjectStatus
+  tier: ProjectTier
+}
+
+export interface ProjectDetails extends Project {
+  datasets: number
+  models: number
+  members: number
+}
+
+interface Quota {
+  used: number
+  limit: number
+}
+
+interface ProjectStats extends Project {
+  datasets: Quota
+  models: Quota
+  jobs: Quota // monthly jobs
+  dashboards: Quota
+  scenarios: Quota
+  members: Quota
+  totalSpend: number
+  roi: number
+}
+
+export type { Project, ProjectStats }
