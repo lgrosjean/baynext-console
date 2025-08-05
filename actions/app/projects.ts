@@ -3,6 +3,8 @@ import { generateSlug } from "@/lib/utils"
 
 import { ProjectTier, Project, ProjectWithCount, ProjectCreate, ProjectWithQuota } from "@/types/project"
 import { createClient } from "@/lib/supabase/server"
+import { revalidatePath } from "next/cache"
+import { redirect } from "next/navigation"
 
 const limits: Record<ProjectTier, { 
     datasets: number
@@ -157,15 +159,17 @@ export async function getProjectWithQuota(userId: string, projectSlug: string): 
     return projectWithQuota;
 }
 
-export async function createProject(project: ProjectCreate): Promise<void> {
+
+export async function createProject(project: Omit<ProjectCreate, 'slug'> ): Promise<void> {
     const supabase = await createClient();
 
+    const slug = generateSlug();
     const { error } = await supabase
         .from('projects')
         .insert({
             ...project,
             user_id: project.user_id, // Ensure user_id is set
-            slug: generateSlug(), // Generate a unique slug
+            slug: slug, // Use the generated slug
         })
 
     if (error) {
@@ -173,4 +177,6 @@ export async function createProject(project: ProjectCreate): Promise<void> {
         throw error;
     }
 
+    revalidatePath(`/app/projects`);
+    redirect(`/app/projects/${slug}`);
 }

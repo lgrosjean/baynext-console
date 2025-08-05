@@ -27,10 +27,10 @@ export const NewProjectDialog = ({ userId } : { userId: string }) => {
 
     const handleCreateProject = async () => {
         if (newProject.name && newProject.description) {
-            const project: ProjectCreate = {
+            const project = {
                 name: newProject.name,
                 description: newProject.description,
-                userId: userId,
+                user_id: userId,
             }
             await createProject(project)
             // Optionally, you can refresh the project list or show a success message here
