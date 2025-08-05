@@ -1,24 +1,17 @@
-export type ProjectStatus = "draft"  | "deployed" | "archived";
-export type ProjectTier = "free" | "pro";
+import { Database } from "./database.types";
 
-export interface ProjectCreate {
-  name: string
-  description: string
-  userId: string
-}
+export type ProjectStatus = Database["public"]["Enums"]["projectStatus"]
+export type ProjectTier = Database["public"]["Enums"]["tier"];
 
-interface Project extends ProjectCreate {
-  id: string
-  slug: string
-  createdAt: Date
-  updatedAt: Date
-  status: ProjectStatus
-  tier: ProjectTier
-}
+export type Project = Database["public"]["Tables"]["projects"]["Row"];
+export type ProjectCreate = Database["public"]["Tables"]["projects"]["Insert"];
 
-export interface ProjectDetails extends Project {
+export type ProjectWithCount = Database["public"]["Tables"]["projects"]["Row"] & {
   datasets: number
   models: number
+  jobs: number // monthly jobs
+  dashboards: number
+  scenarios: number
   members: number
 }
 
@@ -27,15 +20,13 @@ interface Quota {
   limit: number
 }
 
-interface ProjectStats extends Project {
+export type ProjectWithQuota = Omit<ProjectWithCount, "datasets" | "models" | "jobs" | "dashboards" | "scenarios" | "members"> & {
   datasets: Quota
   models: Quota
-  jobs: Quota // monthly jobs
+  jobs: Quota
   dashboards: Quota
   scenarios: Quota
   members: Quota
-  totalSpend: number
-  roi: number
-}
-
-export type { Project, ProjectStats }
+  totalSpend: number // Monthly spend
+  roi: number // Return on investment
+};

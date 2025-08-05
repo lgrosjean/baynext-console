@@ -6,41 +6,54 @@ import { useParams } from 'next/navigation'
 
 import { ChevronRight } from "lucide-react"
 
-import { getProjectStats } from "@/actions/app/projects"
+import { getProject } from "@/actions/app/projects"
 
 import { UserMenu } from "./user-menu"
+import { useAuth } from "@/contexts/auth-context"
 
 export function AppHeader() {
+
+  // const userId = "1b748588-64c0-4575-8e05-c6bb8ce20024" 
+
+  const { user } = useAuth()
+
+  const userId = user?.id
 
   const params = useParams<{ projectSlug: string }>()
 
   const projectSlug = params.projectSlug
 
+  const defaultBreadcrumbs = [
+     { name: "Home", href: "/" },
+    { name: "Projects", href: "/app/projects" },
+  ];
+
   const [projectName, setProjectName] = useState<string | null>(null);
+  const [breadcrumbs, setBreadcrumbs] = useState<{ name: string; href: string }[]>(defaultBreadcrumbs);
 
   useEffect(() => {
     if (projectSlug) {
-      console.log(`Fetching project stats for slug: ${projectSlug} for header`)
-      getProjectStats(projectSlug).then(project => {
+      console.log(`Fetching project name for slug: ${projectSlug} for header`)
+      getProject(userId, projectSlug).then(project => {
+        if (!project) {
+          console.error("Project not found");
+          return;
+        }
         setProjectName(project.name);
+        setBreadcrumbs(prev => [
+          ...defaultBreadcrumbs,
+          { name: project.name, href: `/app/projects/${projectSlug}` },
+        ]);
       }).catch(error => {
         console.error("Error fetching project stats:", error);
       });
     }
+    else {
+      setProjectName(null);
+      setBreadcrumbs(defaultBreadcrumbs);
+    }
   }, [projectSlug]);
 
-  const breadcrumbs = [
-    { name: "Home", href: "/" },
-    { name: "Projects", href: "/app/projects" },
-  ]
-
-  if (projectName) {
-    // Add Project name breadcrumb
-    breadcrumbs.push({
-      name: projectName,
-      href: `/app/projects/${projectSlug}`,
-    })
-  }
 
   return (
     <header className="border-b border-cyan-500/20 bg-slate-950/30 backdrop-blur-xl">

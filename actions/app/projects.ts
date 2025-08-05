@@ -1,8 +1,8 @@
 "use server"
 import { generateSlug } from "@/lib/utils"
-import { ProjectStats } from "@/types/project"
 
-import { ProjectTier, Project, ProjectDetails, ProjectCreate } from "@/types/project"
+import { ProjectTier, Project, ProjectWithCount, ProjectCreate, ProjectWithQuota } from "@/types/project"
+import { createClient } from "@/lib/supabase/server"
 
 const limits: Record<ProjectTier, { 
     datasets: number
@@ -30,167 +30,147 @@ const limits: Record<ProjectTier, {
     }
 }
 
-const projects: ProjectDetails[] = [
-    {
-        id: "1",
-        name: "Q4 Campaign Analysis",
-        description: "Mix marketing model for Q4 holiday campaigns across digital and traditional channels",
-        createdAt: new Date("2024-01-15"),
-        updatedAt: new Date("2024-01-20"),
-        status: "deployed",
-        userId: "user123",
-        slug: generateSlug(),
-        datasets: 3,
-        models: 2,
-        members: 5,
-        tier: "free",
-    },
-    {
-        id: "2",
-        name: "Brand Awareness Study",
-        description: "Attribution modeling for brand awareness campaigns with focus on upper-funnel metrics",
-        createdAt: new Date("2024-01-10"),
-        updatedAt: new Date("2024-01-12"),
-        status: 'archived',
-        userId: "user123",
-        slug: generateSlug(),
-        datasets: 2,
-        models: 1,
-        members: 4,
-        tier: "pro",
-    },
-    {
-        id: "3",
-        name: "Multi-Channel Attribution",
-        description: "Cross-channel attribution analysis for integrated marketing campaigns",
-        createdAt: new Date("2024-01-08"),
-        updatedAt: new Date("2024-01-09"),
-        status: "draft",
-        userId: "user123",
-        slug: generateSlug(),
-        datasets: 4,
-        models: 3,
-        members: 6,
-        tier: "free",
-    },
-    {
-        id: "4",
-        name: "Social Media ROI Analysis",
-        description: "Comprehensive analysis of social media campaign performance and attribution",
-        createdAt: new Date("2024-01-05"),
-        updatedAt: new Date("2024-01-07"),
-        status: "deployed",
-        userId: "user123",
-        slug: generateSlug(),
-        datasets: 5,
-        models: 4,
-        members: 7,
-        tier: "pro",
-    },
-    {
-        id: "5",
-        name: "Email Marketing Attribution",
-        description: "Email campaign attribution modeling with customer journey mapping",
-        createdAt: new Date("2024-01-03"),
-        updatedAt: new Date("2024-01-04"),
-        status: 'deployed',
-        userId: "user123",
-        slug: generateSlug(),
-        datasets: 2,
-        models: 1,
-        members: 3,
-        tier: "free",
-    },
-    {
-        id: "6",
-        name: "Cross-Platform Analytics",
-        description: "Unified analytics across web, mobile, and offline touchpoints",
-        createdAt: new Date("2024-01-01"),
-        updatedAt: new Date("2024-01-02"),
-        status: "draft",
-        userId: "user123",
-        slug: generateSlug(),
-        datasets: 3,
-        models: 2,
-        members: 5,
-        tier: "pro",
-    },
-]
+export async function getProjects(userId: string): Promise<Project[] | null> {
 
-export async function getProjects(userId: string): Promise<Project[]> {
-    // Simulate fetching projects from a database or API
-    await new Promise((resolve) => setTimeout(resolve, 500))
-    
-    return projects.filter(project => project.userId === userId);
+    const supabase = await createClient();
+    const { data, error } = await supabase.from('projects').select('*').eq('user_id', userId)
+
+    if (error) {
+        console.error("Error fetching projects:", error);
+        return null;
+    }
+
+    return data;
 }
+
+export async function getProject(userId: string, projectSlug: string): Promise<Project | null> {
+
+    const supabase = await createClient();
+    const { data, error } = await supabase
+        .from('projects')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('slug', projectSlug)
+        .single() // Get a single project
+
+    if (error) {
+        console.error("Error fetching project:", error);
+        return null;
+    }
+
+    return data || null;
+}
+
 
 /**
  * Fetch project details for a specific user
  * @param userId - The ID of the user
  * @returns The projects' details for the user or null if not found
  */
-export async function getProjectsDetails(userId: string): Promise<ProjectDetails[]> {
-    // Simulate fetching project details from a database or API
-    await new Promise((resolve) => setTimeout(resolve, 500))
+export async function getProjectsWithCount(userId: string): Promise<ProjectWithCount[]> {
+    const projects = await getProjects(userId);
+    if (!projects) return [];
 
-    return projects.filter(project => project.userId === userId);
+    return projects.map(project => ({
+        ...project,
+        datasets: Math.floor(Math.random() * 10), // Simulate datasets count
+        models: Math.floor(Math.random() * 5), // Simulate models count
+        members: Math.floor(Math.random() * 20), // Simulate members count
+        jobs: Math.floor(Math.random() * 50), // Simulate jobs count
+        dashboards: Math.floor(Math.random() * 5), // Simulate dashboards count
+        scenarios: Math.floor(Math.random() * 3), // Simulate scenarios count
+    }));
 }
 
-export async function getProjectStats(projectSlug: string): Promise<ProjectStats> {
+export async function getProjectWithCount(userId: string, projectSlug: string): Promise<ProjectWithCount | null> {
+
+    const supabase = await createClient();
+    const { data, error } = await supabase
+        .from('projects')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('slug', projectSlug)
+
+    if (error) {
+        console.error("Error fetching project:", error);
+        return null;
+    }
+
+    if (!data || data.length === 0) {
+        console.warn(`Project with slug ${projectSlug} not found for user ${userId}`);
+        return null;
+    }
+
+    const project = data[0];
+
+    return {
+        ...project,
+        datasets: Math.floor(Math.random() * 10), // Simulate datasets count
+        models: Math.floor(Math.random() * 5), // Simulate models count
+        members: Math.floor(Math.random() * 20), // Simulate members count
+        jobs: Math.floor(Math.random() * 50), // Simulate jobs count
+        dashboards: Math.floor(Math.random() * 5), // Simulate dashboards count
+        scenarios: Math.floor(Math.random() * 3), // Simulate scenarios count
+    }
+}
+
+export async function getProjectWithQuota(userId: string, projectSlug: string): Promise<ProjectWithQuota> {
     // Simulate fetching project stats from a database or API
     await new Promise((resolve) => setTimeout(resolve, 500))
 
-    const project = projects.find(p => p.slug === projectSlug);
-    if (!project) {
-        throw new Error(`Project with slug ${projectSlug} not found`);
+    const projectDetails = await getProjectWithCount(userId, projectSlug);
+
+    if (!projectDetails) {
+        throw new Error(`Project with slug ${projectSlug} not found for user ${userId}`);
     }
 
-    const tierLimits = limits[project.tier];
-
-    const projectStats: ProjectStats = {
-        ...project,
+    const projectWithQuota: ProjectWithQuota = {
+        ...projectDetails,
         datasets: {
-            used: project.datasets,
-            limit: tierLimits.datasets,
+            used: projectDetails.datasets,
+            limit: limits[projectDetails.tier].datasets,
         },
         models: {
-            used: project.models,   
-            limit: tierLimits.models,
+            used: projectDetails.models,
+            limit: limits[projectDetails.tier].models,
         },
         jobs: {
-            used: 10, // Example value, replace with actual logic
-            limit: tierLimits.jobs,
+            used: projectDetails.jobs,
+            limit: limits[projectDetails.tier].jobs,
         },
         dashboards: {
-            used: 5, // Example value, replace with actual logic    
-            limit: tierLimits.dashboards,
+            used: projectDetails.dashboards,
+            limit: limits[projectDetails.tier].dashboards,
         },
         scenarios: {
-            used: 2, // Example value, replace with actual logic
-            limit: tierLimits.scenarios,
+            used: projectDetails.scenarios,
+            limit: limits[projectDetails.tier].scenarios,
         },
         members: {
-            used: project.members,
-            limit: tierLimits.members,
+            used: projectDetails.members,
+            limit: limits[projectDetails.tier].members,
         },
         totalSpend: 1000, // Example value, replace with actual logic
         roi: 150, // Example value, replace with actual logic
     };
 
-    return projectStats;
+    return projectWithQuota;
 }
 
-export async function createProject(project: ProjectCreate): Promise<Project> {
-    // Simulate creating a project in a database or API
-    await new Promise((resolve) => setTimeout(resolve, 500))
+export async function createProject(project: ProjectCreate): Promise<void> {
+    const supabase = await createClient();
 
-    // Here you would typically save the project to a database and return the saved project
-    return {
-        ...project,
-        id: `${projects.length + 1}`, // Simple ID generation
-        createdAt: new Date(),
-        slug: project.name.toLowerCase().replace(/\s+/g, "-"),
-        status: "draft",
-        tier: "free",
+    const { error } = await supabase
+        .from('projects')
+        .insert({
+            ...project,
+            user_id: project.user_id, // Ensure user_id is set
+            slug: generateSlug(), // Generate a unique slug
+        })
+
+    if (error) {
+        console.error("Error creating project:", error);
+        throw error;
     }
+
 }

@@ -1,22 +1,23 @@
-import { Search, Calendar, BarChart3, Filter, Grid3X3, List } from "lucide-react"
+import { Search, Filter } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import Link from "next/link"
 
-import { getProjectsDetails } from "@/actions/app/projects"
+import { getProjectsWithCount } from "@/actions/app/projects"
 
 import { NewProjectDialog } from "@/components/dashboard/new-project-dialog"
 import { ProjectsCardList } from "@/components/dashboard/projects-card-list"
 
+import { getUser } from "@/actions/app/auth"
+
 export default async function ProjectsPage() {
 
-  const userId = "user123" // Replace with actual user ID from context or auth
+  const user = await getUser() // Fetch the user from the server
+  const userId = user.id 
 
   // Update the projects state to include user_id
-  const projects = await getProjectsDetails(userId)
+  const projects = await getProjectsWithCount(userId)
 
   return (
     <div className="space-y-6 lg:space-y-8">
