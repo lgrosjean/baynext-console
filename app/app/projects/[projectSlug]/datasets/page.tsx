@@ -1,10 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Plus, Upload, Edit, Download, Trash2, FileText, Database, Calendar } from "lucide-react"
+import { Plus, Edit, Download, Trash2, FileText, Database, Calendar } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -19,76 +19,37 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
-interface Dataset {
-  id: string
-  name: string
-  description: string
-  size: string
-  format: string
-  uploadedAt: string
-  status: "ready" | "processing" | "error"
-  rows?: number
-  columns?: number
-}
+import { Dataset } from "@/types/dataset"
+import { getDatasets } from "@/actions/app/datasets"
+
+import { EmptyDataset } from "@/components/dashboard/empty-dataset"
 
 export default function DatasetsPage({ params }: { params: { projectSlug: string } }) {
-  const [datasets, setDatasets] = useState<Dataset[]>([
-    {
-      id: "1",
-      name: "Media Spend Data",
-      description: "Historical media spend across all channels including TV, Digital, Radio, and Print advertising",
-      size: "2.3 MB",
-      format: "CSV",
-      uploadedAt: "2024-01-15",
-      status: "ready",
-      rows: 52000,
-      columns: 12,
-    },
-    {
-      id: "2",
-      name: "Sales Performance",
-      description: "Weekly sales data with regional breakdown and product categories",
-      size: "1.8 MB",
-      format: "CSV",
-      uploadedAt: "2024-01-14",
-      status: "ready",
-      rows: 2600,
-      columns: 8,
-    },
-    {
-      id: "3",
-      name: "External Factors",
-      description: "Weather, holidays, and economic indicators that may impact sales",
-      size: "0.5 MB",
-      format: "JSON",
-      uploadedAt: "2024-01-13",
-      status: "processing",
-      rows: 1200,
-      columns: 15,
-    },
-  ])
-
-  const [newDataset, setNewDataset] = useState({ name: "", description: "", format: "CSV" })
+  
+  const projectSlug = await params.projectSlug
+  const projectName = projectSlug.replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())
+  
+  const [datasets, setDatasets] = useState<Dataset[]>([])
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [newDataset, setNewDataset] = useState<Dataset>({
+    id: "",
+    name: "",
+    description: "",
+    size: 0,
+    format: "CSV",
+    uploadedAt: new Date().toISOString().split("T")[0],
+    status: "processing",
+  })
+  
 
-  const projectName = params.projectSlug.replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())
-
-  const handleCreateDataset = () => {
-    if (newDataset.name && newDataset.description) {
-      const dataset: Dataset = {
-        id: Date.now().toString(),
-        name: newDataset.name,
-        description: newDataset.description,
-        size: "0 MB",
-        format: newDataset.format,
-        uploadedAt: new Date().toISOString().split("T")[0],
-        status: "processing",
-      }
-      setDatasets([dataset, ...datasets])
-      setNewDataset({ name: "", description: "", format: "CSV" })
-      setIsDialogOpen(false)
+  useEffect(() => {
+    const fetchDatasets = async () => {
+      const data = await getDatasets()
+      setDatasets(data)
     }
-  }
+
+    fetchDatasets()
+  }, [])
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -261,18 +222,8 @@ export default function DatasetsPage({ params }: { params: { projectSlug: string
       </div>
 
       {datasets.length === 0 && (
-        <div className="text-center py-12">
-          <Upload className="h-12 w-12 text-slate-600 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-slate-400 mb-2">No datasets yet</h3>
-          <p className="text-slate-500 mb-4">Upload your first dataset to get started with MMM modeling</p>
-          <Button
-            onClick={() => setIsDialogOpen(true)}
-            className="bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Add Your First Dataset
-          </Button>
-        </div>
+          <EmptyDataset setIsDialogOpen={setIsDialogOpen}/>
+        
       )}
     </div>
   )

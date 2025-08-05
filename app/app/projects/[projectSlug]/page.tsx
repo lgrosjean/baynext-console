@@ -1,6 +1,6 @@
-"use client"
-
 import { useState } from "react"
+import Link from "next/link"
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -20,115 +20,47 @@ import {
   Play,
 } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import Link from "next/link"
 
-interface ProjectStats {
-  datasets: { current: number; max: number }
-  models: { current: number; max: number }
-  monthlyJobs: { current: number; max: number }
-  dashboards: { current: number; max: number }
-  totalSpend: number
-  roi: number
-  lastUpdated: string
-}
+import { getRecentActivity } from "@/actions/app/activities"
+import { RecentActivityCard } from "@/components/dashboard/recent-activity-card"
+import { getProjectStats } from "@/actions/app/projects"
+
 
 export default async function ProjectPage({ params }: { params: { projectSlug: string } }) {
-  const [stats] = useState<ProjectStats>({
-    datasets: { current: 3, max: 10 },
-    models: { current: 2, max: 5 },
-    monthlyJobs: { current: 8, max: 20 },
-    dashboards: { current: 1, max: 3 },
-    totalSpend: 750000,
-    roi: 4.2,
-    lastUpdated: "2024-01-16",
-  })
-  
-  const projectSlug = params.projectSlug
+
+  const projectSlug = (await params).projectSlug
 
   const projectName = projectSlug.replace(/-/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())
-
-  const recentActivity = [
-    {
-      id: "1",
-      type: "dataset",
-      title: "Media Spend Data uploaded",
-      time: "2 hours ago",
-      status: "completed",
-    },
-    {
-      id: "2",
-      type: "training",
-      title: "MMM Model v2 training started",
-      time: "4 hours ago",
-      status: "running",
-    },
-    {
-      id: "3",
-      type: "model",
-      title: "MMM Model v1 deployed",
-      time: "1 day ago",
-      status: "completed",
-    },
-    {
-      id: "4",
-      type: "dashboard",
-      title: "Performance dashboard updated",
-      time: "2 days ago",
-      status: "completed",
-    },
-  ]
+  const recentActivity = await getRecentActivity()
+  const stats = await getProjectStats(projectSlug)
 
   const quickActions = [
     {
       title: "New Dataset",
       description: "Upload data for training",
       icon: Database,
-      href: `/projects/${projectSlug}/datasets`,
+      href: `/app/projects/${projectSlug}/datasets`,
       color: "from-blue-500 to-cyan-500",
     },
     {
       title: "Training Job",
       description: "Start model training",
       icon: Brain,
-      href: `/projects/${projectSlug}/training`,
+      href: `/app/projects/${projectSlug}/training`,
       color: "from-purple-500 to-pink-500",
     },
     {
       title: "Deploy Model",
       description: "Deploy trained model",
       icon: Rocket,
-      href: `/projects/${projectSlug}/models`,
+      href: `/app/projects/${projectSlug}/models`,
       color: "from-green-500 to-emerald-500",
     },
   ]
 
-  const getActivityIcon = (type: string) => {
-    switch (type) {
-      case "dataset":
-        return <Database className="h-4 w-4" />
-      case "training":
-        return <Brain className="h-4 w-4" />
-      case "model":
-        return <Rocket className="h-4 w-4" />
-      case "dashboard":
-        return <BarChart3 className="h-4 w-4" />
-      default:
-        return <Activity className="h-4 w-4" />
-    }
-  }
+  
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "completed":
-        return "text-green-400"
-      case "running":
-        return "text-yellow-400"
-      case "failed":
-        return "text-red-400"
-      default:
-        return "text-slate-400"
-    }
-  }
+  
 
   return (
     <div className="space-y-6 lg:space-y-8">
@@ -150,19 +82,19 @@ export default async function ProjectPage({ params }: { params: { projectSlug: s
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-slate-900 border-slate-700 w-56">
               <DropdownMenuItem asChild className="text-slate-300 focus:bg-slate-800 focus:text-cyan-300">
-                <Link href={`/projects/${projectSlug}/datasets`}>
+                <Link href={`/app/projects/${projectSlug}/datasets`}>
                   <Database className="h-4 w-4 mr-2" />
                   New Dataset
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild className="text-slate-300 focus:bg-slate-800 focus:text-cyan-300">
-                <Link href={`/projects/${projectSlug}/training`}>
+                <Link href={`/app/projects/${projectSlug}/training`}>
                   <Brain className="h-4 w-4 mr-2" />
                   Training Job
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild className="text-slate-300 focus:bg-slate-800 focus:text-cyan-300">
-                <Link href={`/projects/${projectSlug}/models`}>
+                <Link href={`/app/projects/${projectSlug}/models`}>
                   <Rocket className="h-4 w-4 mr-2" />
                   Deploy Model
                 </Link>
@@ -171,13 +103,13 @@ export default async function ProjectPage({ params }: { params: { projectSlug: s
           </DropdownMenu>
 
           <div className="flex gap-2">
-            <Link href={`/projects/${projectSlug}/dashboard`}>
+            <Link href={`/app/projects/${projectSlug}/dashboard`}>
               <Button variant="outline" className="border-slate-700 text-slate-300 hover:text-cyan-300 bg-transparent">
                 <BarChart3 className="h-4 w-4 mr-2" />
                 <span className="hidden sm:inline">Dashboard</span>
               </Button>
             </Link>
-            <Link href={`/projects/${projectSlug}/scenarios`}>
+            <Link href={`/app/projects/${projectSlug}/scenarios`}>
               <Button variant="outline" className="border-slate-700 text-slate-300 hover:text-cyan-300 bg-transparent">
                 <Target className="h-4 w-4 mr-2" />
                 <span className="hidden sm:inline">Scenarios</span>
@@ -189,7 +121,7 @@ export default async function ProjectPage({ params }: { params: { projectSlug: s
 
       {/* Navigation Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
-        <Link href={`/projects/${projectSlug}/datasets`}>
+        <Link href={`/app/projects/${projectSlug}/datasets`}>
           <Card className="bg-slate-900/50 border-slate-700 hover:border-cyan-500/50 transition-all cursor-pointer group">
             <CardContent className="p-4 text-center">
               <Database className="h-6 w-6 sm:h-8 sm:w-8 text-cyan-400 mx-auto mb-2 group-hover:scale-110 transition-transform" />
@@ -201,7 +133,7 @@ export default async function ProjectPage({ params }: { params: { projectSlug: s
           </Card>
         </Link>
 
-        <Link href={`/projects/${projectSlug}/training`}>
+        <Link href={`/app/projects/${projectSlug}/training`}>
           <Card className="bg-slate-900/50 border-slate-700 hover:border-purple-500/50 transition-all cursor-pointer group">
             <CardContent className="p-4 text-center">
               <Brain className="h-6 w-6 sm:h-8 sm:w-8 text-purple-400 mx-auto mb-2 group-hover:scale-110 transition-transform" />
@@ -211,7 +143,7 @@ export default async function ProjectPage({ params }: { params: { projectSlug: s
           </Card>
         </Link>
 
-        <Link href={`/projects/${projectSlug}/models`}>
+        <Link href={`/app/projects/${projectSlug}/models`}>
           <Card className="bg-slate-900/50 border-slate-700 hover:border-green-500/50 transition-all cursor-pointer group">
             <CardContent className="p-4 text-center">
               <Rocket className="h-6 w-6 sm:h-8 sm:w-8 text-green-400 mx-auto mb-2 group-hover:scale-110 transition-transform" />
@@ -221,7 +153,7 @@ export default async function ProjectPage({ params }: { params: { projectSlug: s
           </Card>
         </Link>
 
-        <Link href={`/projects/${projectSlug}/dashboard`}>
+        <Link href={`/app/projects/${projectSlug}/dashboard`}>
           <Card className="bg-slate-900/50 border-slate-700 hover:border-blue-500/50 transition-all cursor-pointer group">
             <CardContent className="p-4 text-center">
               <BarChart3 className="h-6 w-6 sm:h-8 sm:w-8 text-blue-400 mx-auto mb-2 group-hover:scale-110 transition-transform" />
@@ -231,7 +163,7 @@ export default async function ProjectPage({ params }: { params: { projectSlug: s
           </Card>
         </Link>
 
-        <Link href={`/projects/${projectSlug}/scenarios`}>
+        <Link href={`/app/projects/${projectSlug}/scenarios`}>
           <Card className="bg-slate-900/50 border-slate-700 hover:border-orange-500/50 transition-all cursor-pointer group col-span-2 sm:col-span-1">
             <CardContent className="p-4 text-center">
               <Target className="h-6 w-6 sm:h-8 sm:w-8 text-orange-400 mx-auto mb-2 group-hover:scale-110 transition-transform" />
@@ -367,29 +299,7 @@ export default async function ProjectPage({ params }: { params: { projectSlug: s
         </Card>
 
         {/* Recent Activity */}
-        <Card className="bg-slate-900/50 border-slate-700">
-          <CardHeader>
-            <CardTitle className="text-white flex items-center">
-              <Activity className="h-5 w-5 mr-2 text-cyan-400" />
-              Recent Activity
-            </CardTitle>
-            <CardDescription className="text-slate-400">Latest updates and changes</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {recentActivity.map((activity) => (
-              <div key={activity.id} className="flex items-center p-3 rounded-lg bg-slate-800/30">
-                <div className="p-2 rounded-lg bg-slate-700 mr-3">{getActivityIcon(activity.type)}</div>
-                <div className="flex-1">
-                  <h4 className="text-sm font-medium text-white">{activity.title}</h4>
-                  <div className="flex items-center justify-between mt-1">
-                    <p className="text-xs text-slate-400">{activity.time}</p>
-                    <span className={`text-xs ${getStatusColor(activity.status)}`}>{activity.status}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
+        <RecentActivityCard recentActivity={recentActivity} />
       </div>
 
       {/* Project Info */}
