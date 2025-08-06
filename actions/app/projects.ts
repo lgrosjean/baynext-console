@@ -32,7 +32,7 @@ const limits: Record<ProjectTier, {
     }
 }
 
-export async function getProjects(userId: string): Promise<Project[] | null> {
+export async function getUserProjects(userId: string): Promise<Project[] | null> {
 
     const supabase = await createClient();
     const { data, error } = await supabase.from('projects').select('*').eq('user_id', userId)
@@ -63,6 +63,22 @@ export async function getProject(userId: string, projectSlug: string): Promise<P
     return data || null;
 }
 
+export async function getProjectById({ userId, projectId} : {userId: string, projectId: string}): Promise<Project | null> {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+        .from('projects')
+        .select('*')    
+        .eq('user_id', userId)
+        .eq('id', projectId)
+        .single();
+
+    if (error) {
+        console.error("Error fetching project:", error);
+        return null;
+    }
+
+    return data || null;
+}
 
 /**
  * Fetch project details for a specific user
@@ -70,7 +86,7 @@ export async function getProject(userId: string, projectSlug: string): Promise<P
  * @returns The projects' details for the user or null if not found
  */
 export async function getProjectsWithCount(userId: string): Promise<ProjectWithCount[]> {
-    const projects = await getProjects(userId);
+    const projects = await getUserProjects(userId);
     if (!projects) return [];
 
     return projects.map(project => ({

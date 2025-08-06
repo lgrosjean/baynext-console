@@ -2,6 +2,7 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
+import { Toaster } from "@/components/ui/sonner"
 import "@/styles/globals.css"
 import { AuthProvider } from "@/contexts/auth-context"
 
@@ -23,6 +24,7 @@ export default function RootLayout({
         { process.env.VERCEL && <Analytics/> }
         <AuthProvider>
                 <main>{children}</main>
+                <Toaster />
         </AuthProvider>
       </body>
     </html>
