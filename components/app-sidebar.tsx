@@ -1,47 +1,20 @@
 "use client"
 
-import { Brain, FolderOpen, Settings, BarChart3, Zap } from "lucide-react"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { useParams } from "next/navigation"
+
+import { Zap } from "lucide-react"
 
 import {
   Sidebar,
-  SidebarContent,
   SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
 } from "@/components/ui/sidebar"
 
-const menuItems = [
-  {
-    title: "Projects",
-    url: "/projects",
-    icon: FolderOpen,
-  },
-  {
-    title: "Models",
-    url: "/models",
-    icon: Brain,
-  },
-  {
-    title: "Analytics",
-    url: "/analytics",
-    icon: BarChart3,
-  },
-  {
-    title: "Settings",
-    url: "/settings",
-    icon: Settings,
-  },
-]
+import { OrgSidebar } from "./sidebar/org-sidebar"
 
 export function AppSidebar() {
-  const pathname = usePathname()
+
+  const { projectSlug } = useParams<{ projectSlug: string }>()
 
   return (
     <Sidebar className="border-r border-cyan-500/20 bg-slate-950/50 backdrop-blur-xl">
@@ -60,29 +33,11 @@ export function AppSidebar() {
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="p-4">
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-cyan-400/80 font-semibold">Navigation</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {menuItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={pathname === item.url}
-                    className="hover:bg-cyan-500/10 hover:text-cyan-300 data-[active=true]:bg-gradient-to-r data-[active=true]:from-cyan-500/20 data-[active=true]:to-purple-500/20 data-[active=true]:text-cyan-300 data-[active=true]:border-r-2 data-[active=true]:border-cyan-400"
-                  >
-                    <Link href={item.url}>
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
+      {!projectSlug ?
+        <OrgSidebar />
+
+        : <OrgSidebar />
+      }
 
       <SidebarFooter className="border-t border-cyan-500/20 p-4">
         <div className="text-xs text-slate-500 text-center">v2.1.0 • Neural Engine</div>

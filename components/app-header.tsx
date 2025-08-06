@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useEffect, useState } from "react"
-import { useParams } from 'next/navigation'
+import { useParams, usePathname } from 'next/navigation'
 
 import { ChevronRight } from "lucide-react"
 
@@ -11,48 +11,60 @@ import { getProject } from "@/actions/app/projects"
 import { UserMenu } from "./user-menu"
 import { useAuth } from "@/contexts/auth-context"
 
+
+
 export function AppHeader() {
 
-  // const userId = "1b748588-64c0-4575-8e05-c6bb8ce20024" 
-
-  const { user } = useAuth()
-
-  const userId = user?.id
-
   const params = useParams<{ projectSlug: string }>()
+  const pathname = usePathname()
+  const { user } = useAuth()
+  
+  // Move all hooks before any conditional logic
+  const [breadcrumbs, setBreadcrumbs] = useState([
+    { name: "Home", href: "/" },
+  ])
 
   const projectSlug = params.projectSlug
-
-  const defaultBreadcrumbs = [
-     { name: "Home", href: "/" },
-    { name: "Projects", href: "/app/projects" },
-  ];
-
-  const [projectName, setProjectName] = useState<string | null>(null);
-  const [breadcrumbs, setBreadcrumbs] = useState<{ name: string; href: string }[]>(defaultBreadcrumbs);
+  const userId = user?.id
 
   useEffect(() => {
-    if (projectSlug) {
-      console.log(`Fetching project name for slug: ${projectSlug} for header`)
-      getProject(userId, projectSlug).then(project => {
-        if (!project) {
-          console.error("Project not found");
-          return;
-        }
-        setProjectName(project.name);
-        setBreadcrumbs(prev => [
-          ...defaultBreadcrumbs,
-          { name: project.name, href: `/app/projects/${projectSlug}` },
-        ]);
-      }).catch(error => {
-        console.error("Error fetching project stats:", error);
-      });
+    // Reset breadcrumbs to default
+    let newBreadcrumbs = [{ name: "Home", href: "/" }]
+    
+    if (pathname.startsWith("/app/projects")) {
+      const projectCrumb = { name: "Projects", href: "/app/projects" };
+
+      if (projectSlug && userId) {
+        console.log(`Fetching project name for slug: ${projectSlug} for header`)
+        getProject(userId, projectSlug).then(project => {
+          if (!project) {
+            console.error("Project not found");
+            return;
+          }
+          setBreadcrumbs([
+            ...newBreadcrumbs,
+            projectCrumb,
+            { name: project.name, href: `/app/projects/${project.slug}` }
+          ]);
+          
+        }).catch(error => {
+          console.error("Error fetching project stats:", error);
+        });
+      } else {
+        setBreadcrumbs([...newBreadcrumbs, projectCrumb]);
+      }
+    } else if (pathname.startsWith("/app/settings")) {
+      setBreadcrumbs([...newBreadcrumbs, { name: "Settings", href: "/app/settings" }]);
+    } else {
+      setBreadcrumbs(newBreadcrumbs);
     }
-    else {
-      setProjectName(null);
-      setBreadcrumbs(defaultBreadcrumbs);
-    }
-  }, [projectSlug]);
+
+  }, [userId, projectSlug, pathname]);
+
+  // Now do the conditional return after all hooks
+  if (!user) {
+    return null // or a loading state
+  }
 
 
   return (
@@ -66,7 +78,7 @@ export function AppHeader() {
                 {index > 0 && (
                   <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4 text-slate-500 mx-1 sm:mx-2 flex-shrink-0" />
                 )}
-                <Link
+                <a
                   href={crumb.href}
                   className={`hover:text-cyan-300 transition-colors truncate ${index === breadcrumbs.length - 1 ? "text-cyan-400 font-medium" : "text-slate-400"
                     }`}
@@ -75,7 +87,7 @@ export function AppHeader() {
                   <span className="sm:hidden">
                     {crumb.name.length > 10 ? crumb.name.substring(0, 10) + "..." : crumb.name}
                   </span>
-                </Link>
+                </a>
               </div>
             ))}
           </nav>
