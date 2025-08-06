@@ -84,12 +84,12 @@ export const NewApiKeyDialog = ({ userId }: { userId: string }) => {
     }
 
     const apiKey: ApiKeyCreate = {
-      userId: userId,
+      user_id: userId,
       name: newApiKey.name,
       start: start,
       key: key,
       permissions: selectedProjects && selectedProjects.join(","),
-      expiresAt: expirationMap[expiresAt],
+      expiresAt: expirationMap[expiresAt]?.toUTCString() || null,
     }
 
     try {

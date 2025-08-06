@@ -1,89 +1,81 @@
 "use server"
 
+import { createClient } from "@/lib/supabase/server"
 import { ApiKey, ApiKeyCreate } from "@/types/api-keys.types"
 import { revalidatePath } from "next/cache";
 
-const apiKeys: ApiKey[] = [
-  {
-    id: "1",
-    name: "Production API",
-    userId: "user_123",
-    key: "sk_live_1234567890abcdef1234567890abcdef",
-    permissions: null,
-    expiresAt: null,
-    createdAt: new Date("2024-01-15"),
-    lastUsed: new Date("2024-01-20"),
-    enabled: true,
-  },
-  {
-    id: "2",
-    userId: "user_123",
-    name: "Development Key",
-    key: "sk_test_abcdef1234567890abcdef1234567890",
-    permissions: "1,2",
-    expiresAt: new Date("2024-06-15"),
-    createdAt: new Date("2024-01-10"),
-    lastUsed: new Date("2024-01-19"),
-    enabled: true,
-  },
-  {
-    id: "3",
-    userId: "user_123",
-    name: "Analytics Dashboard",
-    key: "sk_live_fedcba0987654321fedcba0987654321",
-    permissions: null,
-    expiresAt: new Date("2024-03-15"),
-    createdAt: new Date("2024-01-05"),
-    lastUsed: null,
-    enabled: false,
-  },
-]
 
 export async function getApiKeys(userId: string): Promise<ApiKey[]> {
-  // Simulate fetching from a database
-  return apiKeys.filter(key => key.userId === userId);
+  const supabase = await createClient();
+  const { data: apiKeys, error } = await supabase
+    .from('apiKey')
+    .select('*')
+    .eq('user_id', userId);
+
+  if (error) {
+    console.error("Error fetching API keys:", error);
+    throw new Error("Failed to fetch API keys");
+  }
+
+  return apiKeys;
 }
 
 export async function createApiKey(apiKey: ApiKeyCreate, userId: string): Promise<ApiKey> {
-  // Simulate creating an API key
-  // TODO: bcrypt the key before storing it
+  console.log(`Creating API Key for User ID: ${userId}`, apiKey.name)
 
-  const newApiKey: ApiKey = {
-    ...apiKey,
-    id: Date.now().toString(),
-    userId: userId,
-    lastUsed: null,
-    createdAt: new Date(),
-    enabled: true,
+  const supabase = await createClient();
+  const { data: createdApiKey, error } = await supabase
+    .from('apiKey')
+    .insert(apiKey)
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Error creating API key:", error);
+    console.error(apiKey);
+    throw new Error("Failed to create API key");
   }
 
-  console.log(`Creating API Key for User ID: ${userId}`, newApiKey.name)
+  revalidatePath('/app/settings');
+  console.log(`API Key created successfully: ${createdApiKey.id} for User ID: ${userId}`);
 
-  apiKeys.push(newApiKey)
-  revalidatePath(`/app/settings`)
-  return newApiKey
+  return createdApiKey;
 }
 
-export async function updateApiKeyStatus(apiKey: ApiKey, userId: string): Promise<ApiKey> {
-  // Simulate updating an API key's status
+export async function updateApiKeyStatus(apiKey: ApiKey, userId: string): Promise<void> {
   console.log(`Updating API Key status for ID: ${apiKey.id}, User ID: ${userId}`)
-  const index = apiKeys.findIndex(key => key.id === apiKey.id && key.userId === userId);
-  if (index !== -1) {
-    apiKeys[index] = { ...apiKeys[index], enabled: !apiKeys[index].enabled };
-    console.log(`API Key with ID ${apiKey.id} updated to ${apiKeys[index].enabled ? "active" : "inactive"}`);
-    revalidatePath(`/app/settings`)
-    return apiKeys[index];
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from('apiKey')
+    .update({ enabled: !apiKey.enabled })
+    .eq('id', apiKey.id)
+
+  if (error) {
+    console.error("Error updating API key status:", error);
+    throw new Error("Failed to update API key status");
   }
-  throw new Error("API Key not found or does not belong to user");
+
+  apiKey.enabled = !apiKey.enabled; // Toggle the status in the local object
+
+  revalidatePath('/app/settings');
+  console.log(`API Key ${apiKey.id} status updated to ${apiKey.enabled ? 'enabled' : 'disabled'}`);
 }
 
 export async function deleteApiKey(apiKeyId: string, userId: string): Promise<void> {
-  // Simulate deleting an API key
-  const index = apiKeys.findIndex(key => key.id === apiKeyId && key.userId === userId);
-  if (index !== -1) {
-    apiKeys.splice(index, 1);
-    revalidatePath(`/app/settings`)
+  console.log(`Deleting API Key with ID: ${apiKeyId}, User ID: ${userId}`)
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from('apiKey')
+    .delete()
+    .eq('id', apiKeyId)
+    .eq('user_id', userId);
+
+  if (error) {
+    console.error("Error deleting API key:", error);
+    throw new Error("Failed to delete API key");
   }
 
-  console.log(`API Key with ID ${apiKeyId} deleted!`);
+  revalidatePath('/app/settings');
+  console.log(`API Key ${apiKeyId} deleted successfully`);
 }

@@ -1,3 +1,5 @@
+import { Database } from "./database.types";
+
 /**
  * API Key Type Definition
  * This type defines the structure of an API key object used in the application.
@@ -6,18 +8,7 @@
  * 
  * Read more: https://www.better-auth.com/docs/plugins/api-key#schema
  */
-export type ApiKey = {
-  id: string; // PK. The ID of the API key.
-  userId: string; // FK. The ID of the user who created the API key.
-  name: string; // The name of the API key.
-  start?: string; // The starting characters of the API key. Useful for showing the first few characters of the API key in the UI for the users to easily identify.
-  key: string; // The hashed API key itself.
-  permissions: string | null; // The permissions of the key.
-  expiresAt: Date | null; // ISO date string or null
-  createdAt: Date; // ISO date string
-  lastUsed: Date | null; // ISO date string or null
-  enabled: boolean; // Indicates if the API key is currently active
-};
+export type ApiKey = Database['public']['Tables']['apiKey']['Row'];
 
 /**
  * API Key Creation Type Definition
@@ -25,4 +16,4 @@ export type ApiKey = {
  * This type is used when creating a new API key, excluding fields that are automatically generated
  * such as ID, creation date, last used date, and active status.
  */
-export type ApiKeyCreate = Omit<ApiKey, 'id' | 'createdAt' | 'lastUsed' | 'enabled'>;
+export type ApiKeyCreate = Database['public']['Tables']['apiKey']['Insert'];

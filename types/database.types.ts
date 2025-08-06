@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      apiKey: {
+        Row: {
+          createdAt: string
+          enabled: boolean
+          expiresAt: string | null
+          id: string
+          key: string
+          lastUsed: string | null
+          name: string
+          permissions: string | null
+          start: string | null
+          user_id: string
+        }
+        Insert: {
+          createdAt?: string
+          enabled?: boolean
+          expiresAt?: string | null
+          id?: string
+          key: string
+          lastUsed?: string | null
+          name: string
+          permissions?: string | null
+          start?: string | null
+          user_id: string
+        }
+        Update: {
+          createdAt?: string
+          enabled?: boolean
+          expiresAt?: string | null
+          id?: string
+          key?: string
+          lastUsed?: string | null
+          name?: string
+          permissions?: string | null
+          start?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       datasets: {
         Row: {
           created_at: string | null
