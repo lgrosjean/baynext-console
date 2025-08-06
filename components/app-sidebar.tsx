@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/sidebar"
 
 import { OrgSidebar } from "./sidebar/org-sidebar"
+import { ProjectSidebar } from "./sidebar/project-sidebar"
 
 export function AppSidebar() {
 
@@ -33,14 +34,10 @@ export function AppSidebar() {
         </div>
       </SidebarHeader>
 
-      {!projectSlug ?
-        <OrgSidebar />
-
-        : <OrgSidebar />
-      }
+      { !projectSlug ? <OrgSidebar /> : <ProjectSidebar /> }
 
       <SidebarFooter className="border-t border-cyan-500/20 p-4">
-        <div className="text-xs text-slate-500 text-center">v2.1.0 • Neural Engine</div>
+        <div className="text-xs text-slate-500 text-center">v2.1.0 • BayNext</div>
       </SidebarFooter>
     </Sidebar>
   )

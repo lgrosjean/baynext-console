@@ -15,8 +15,11 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
-export function UserMenu() {
-    const { user, signOut } = useAuth()
+import { User } from "@supabase/supabase-js"
+
+export function UserMenu({ user }: { user: User | null }) {
+
+    const {  signOut } = useAuth()
 
     return (
         <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">

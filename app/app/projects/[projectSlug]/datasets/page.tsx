@@ -1,3 +1,4 @@
+import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -65,6 +66,7 @@ export default async function DatasetsPage({ params }: { params: { projectSlug: 
 
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
         {datasets.map((dataset) => (
+          <Link key={dataset.id} href={`/app/projects/${projectSlug}/datasets/${dataset.id}`}>
           <Card key={dataset.id} className="bg-slate-900/50 border-slate-700 hover:border-cyan-500/50 transition-all">
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between gap-2">
@@ -117,6 +119,7 @@ export default async function DatasetsPage({ params }: { params: { projectSlug: 
               </div>
             </CardContent>
           </Card>
+          </Link>
         ))}
       </div>
 
