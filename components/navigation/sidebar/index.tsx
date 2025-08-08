@@ -10,8 +10,8 @@ import {
   SidebarHeader,
 } from "@/components/ui/sidebar"
 
-import { OrgSidebar } from "./sidebar/org-sidebar"
-import { ProjectSidebar } from "./sidebar/project-sidebar"
+import { OrgSidebar } from "./org-sidebar"
+import { ProjectSidebar } from "./project-sidebar"
 
 export function AppSidebar() {
 

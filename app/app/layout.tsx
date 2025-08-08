@@ -2,8 +2,8 @@ import type React from "react"
 import type { Metadata } from "next"
 import "@/styles/globals.css"
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
-import { AppSidebar } from "@/components/app-sidebar"
-import { AppHeader } from "@/components/app-header"
+import { AppSidebar } from "@/components/navigation/sidebar"
+import { AppHeader } from "@/components/navigation/header/app-header"
 
 import { getUser } from "@/actions/app/auth"
 

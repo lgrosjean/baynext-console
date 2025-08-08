@@ -9,6 +9,8 @@ import bytes from 'bytes';
 import { EmptyDataset } from "@/components/dashboard/empty-dataset"
 import { NewDatasetDialog } from "@/components/dashboard/new-dataset-dialog"
 
+import MeridianDatasetCreator from "@/components/datasets/new-dataset-dialog"
+
 export default async function DatasetsPage({ params }: { params: { projectSlug: string } }) {
   
   const projectSlug = (await params).projectSlug
@@ -62,6 +64,7 @@ export default async function DatasetsPage({ params }: { params: { projectSlug: 
         </div>
 
         <NewDatasetDialog />
+        <MeridianDatasetCreator />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">

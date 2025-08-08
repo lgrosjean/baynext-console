@@ -15,7 +15,7 @@ import { ChevronRight } from "lucide-react"
 
 import { getProject } from "@/actions/app/projects"
 
-import { UserMenu } from "./user-menu"
+import { UserMenu } from "../../user-menu"
 
 import { User } from "@supabase/supabase-js"
 
@@ -61,14 +61,16 @@ export function AppHeader({ user }: { user: User | null }) {
               </BreadcrumbItem>
 
               {projectSlug && (
-                <BreadcrumbItem>
-                  <BreadcrumbSeparator>
+                <>
+                <BreadcrumbSeparator>
                     <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4 text-slate-500 mx-1 sm:mx-2 flex-shrink-0" />
                   </BreadcrumbSeparator>
+                <BreadcrumbItem>
                   <BreadcrumbLink href={`/app/projects/${projectSlug}`} className="text-cyan-400 hover:text-cyan-300 truncate transition-colors">
                     {projectName}
                   </BreadcrumbLink>
                 </BreadcrumbItem>
+                </>
               )}
 
             </BreadcrumbList>
