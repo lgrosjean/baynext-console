@@ -15,7 +15,7 @@ import { ChevronRight } from "lucide-react"
 
 import { getProject } from "@/actions/app/projects"
 
-import { UserMenu } from "../../user-menu"
+import { UserMenu } from "./user-menu"
 
 import { User } from "@supabase/supabase-js"
 

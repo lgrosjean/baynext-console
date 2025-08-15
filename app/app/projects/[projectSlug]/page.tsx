@@ -103,20 +103,6 @@ export default async function ProjectPage({ params }: { params: { projectSlug: s
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <div className="flex gap-2">
-            <Link href={`/app/projects/${projectSlug}/dashboard`}>
-              <Button variant="outline" className="border-slate-700 text-slate-300 hover:text-blue-400 bg-transparent">
-                <BarChart3 className="h-4 w-4 mr-2" />
-                <span className="hidden sm:inline">Dashboard</span>
-              </Button>
-            </Link>
-            <Link href={`/app/projects/${projectSlug}/scenarios`}>
-              <Button variant="outline" className="border-slate-700 text-slate-300 hover:text-orange-400 bg-transparent">
-                <Target className="h-4 w-4 mr-2" />
-                <span className="hidden sm:inline">Scenarios</span>
-              </Button>
-            </Link>
-          </div>
         </div>
       </div>
 
