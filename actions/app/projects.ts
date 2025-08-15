@@ -146,27 +146,27 @@ export async function getProjectWithQuota(userId: string, projectSlug: string): 
         ...projectDetails,
         datasets: {
             used: projectDetails.datasets,
-            limit: limits[projectDetails.tier].datasets,
+            limit: limits["free"].datasets,
         },
         models: {
             used: projectDetails.models,
-            limit: limits[projectDetails.tier].models,
+            limit: limits["free"].models,
         },
         jobs: {
             used: projectDetails.jobs,
-            limit: limits[projectDetails.tier].jobs,
+            limit: limits["free"].jobs,
         },
         dashboards: {
             used: projectDetails.dashboards,
-            limit: limits[projectDetails.tier].dashboards,
+            limit: limits["free"].dashboards,
         },
         scenarios: {
             used: projectDetails.scenarios,
-            limit: limits[projectDetails.tier].scenarios,
+            limit: limits["free"].scenarios,
         },
         members: {
             used: projectDetails.members,
-            limit: limits[projectDetails.tier].members,
+            limit: limits["free"].members,
         },
         totalSpend: 1000, // Example value, replace with actual logic
         roi: 150, // Example value, replace with actual logic
